@@ -10,6 +10,7 @@ Reusable skills for AI coding agents (Claude Code, Cursor, Cline, etc.)
 | [bootstrap-machine](./bootstrap-machine/) | Set up a new dev machine with modern CLI tools |
 | [gh-pr-address-comments](./gh-pr-address-comments/) | Fetch and address GitHub PR review comments |
 | [gh-pr-with-screenshots](./gh-pr-with-screenshots/) | Create PRs with embedded UI screenshots |
+| [syncthing](./syncthing/) | Monitor Syncthing sync status between devices |
 
 ## Installation
 
@@ -81,6 +82,19 @@ Creates PRs with embedded UI screenshots:
 - Uses `blob/?raw=1` URLs for reliable image embedding
 
 **Usage**: Run `/gh-pr-with-screenshots` after implementing a UI feature
+
+### syncthing
+
+Monitor and manage Syncthing file synchronization:
+
+- Check sync status via REST API
+- Detect sync errors and stuck files
+- Force rescan after .stignore changes
+- Cross-platform (macOS + Linux)
+
+**Setup**: Replace `<FOLDER_ID>`, `<SYNC_FOLDER>`, etc. with your values
+
+**Usage**: Run `/syncthing` to check sync status
 
 ## Contributing
 
