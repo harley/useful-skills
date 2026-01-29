@@ -6,7 +6,10 @@ Reusable skills for AI coding agents (Claude Code, Cursor, Cline, etc.)
 
 | Skill | Description |
 |-------|-------------|
+| [ask-questions-if-underspecified](./ask-questions-if-underspecified/) | Clarify requirements before implementing |
 | [bootstrap-machine](./bootstrap-machine/) | Set up a new dev machine with modern CLI tools |
+| [gh-pr-address-comments](./gh-pr-address-comments/) | Fetch and address GitHub PR review comments |
+| [gh-pr-with-screenshots](./gh-pr-with-screenshots/) | Create PRs with embedded UI screenshots |
 
 ## Installation
 
@@ -34,6 +37,17 @@ Instructions for the agent...
 
 ## Skills Overview
 
+### ask-questions-if-underspecified
+
+A methodology skill that teaches agents to clarify requirements before implementing:
+
+- Detect underspecified requests (unclear scope, constraints, acceptance criteria)
+- Ask 1-5 focused questions with multiple-choice options
+- Provide fast-path defaults (`reply: defaults`)
+- Pause before acting until must-have answers arrive
+
+**Usage**: Run `/ask-questions-if-underspecified` before complex tasks
+
 ### bootstrap-machine
 
 Automates setting up a new macOS development machine:
@@ -45,6 +59,28 @@ Automates setting up a new macOS development machine:
 - Initializes zoxide for smart directory jumping
 
 **Usage**: Run `/bootstrap-machine` in Claude Code
+
+### gh-pr-address-comments
+
+Automates addressing GitHub PR review comments:
+
+- Fetch review comments via `gh api`
+- Triage comments (address now / defer / no-op)
+- Implement fixes and push updates
+- Optionally reply/resolve threads
+
+**Usage**: Run `/gh-pr-address-comments` on a feature branch with an open PR
+
+### gh-pr-with-screenshots
+
+Creates PRs with embedded UI screenshots:
+
+- Push branch and create PR if missing
+- Capture screenshots using browser automation
+- Commit screenshots and update PR description
+- Uses `blob/?raw=1` URLs for reliable image embedding
+
+**Usage**: Run `/gh-pr-with-screenshots` after implementing a UI feature
 
 ## Contributing
 
