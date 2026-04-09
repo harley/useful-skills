@@ -1,42 +1,54 @@
 ---
 name: bootstrap-machine
-description: Set up a new machine with CLI tools and Claude Code configuration. Use when setting up a fresh macOS computer or restoring development environment.
+description: Bootstrap a fresh development machine (macOS or Linux) with modern CLI tools, safe shell defaults, and Claude Code skills. Use when setting up a new computer or restoring a development environment.
 ---
 
 # Bootstrap Machine
 
-Automate the setup of a new development machine with modern CLI tools and Claude Code configuration.
+Set up a new development machine with modern CLI tools and Claude Code configuration.
 
 ## Quick Start
 
-When the user runs `/bootstrap-machine`, follow the interactive setup flow.
+When the user runs `/bootstrap-machine`, use an interactive flow and apply only user-approved changes.
 
 ## Setup Flow
 
-### 1. Detect Environment
+### 1. Detect environment
 
 ```bash
-# Check OS
+# OS and shell
 uname -s
+printf '%s\n' "$SHELL"
 
-# Check if Homebrew is installed
-which brew || echo "Homebrew not installed"
+# Linux distro details (if Linux)
+[ -f /etc/os-release ] && cat /etc/os-release
 
-# Check existing tools
-which fd rg eza bat dust sd zoxide delta broot tokei procs btm 2>/dev/null
+# Package managers
+which brew apt dnf pacman zypper 2>/dev/null
+
+# Existing tools
+which fd rg eza bat dust sd zoxide delta broot tokei procs btm tldr 2>/dev/null
 ```
 
-### 2. Install Homebrew (if needed)
+### 2. Install package manager (if needed)
 
-If Homebrew is not installed:
+#### macOS
+
+If Homebrew is missing:
 
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
-### 3. Install Modern CLI Tools
+#### Linux
 
-These replace traditional Unix utilities with faster, more ergonomic alternatives:
+Use the system package manager (apt/dnf/pacman/zypper). Do not install Homebrew by default unless the user asks.
+
+### 3. Install modern CLI tools
+
+These complement core Unix tools and improve DX.
+
+#### macOS (Homebrew)
 
 ```bash
 brew install \
@@ -55,10 +67,22 @@ brew install \
   tealdeer
 ```
 
-#### Tool Reference
+#### Linux (example package names)
 
-| Tool | Replaces | Purpose |
-|------|----------|---------|
+Install what exists in distro repos first; skip unavailable packages and report clearly.
+
+```bash
+# Debian/Ubuntu (example)
+sudo apt update
+sudo apt install -y fd-find ripgrep eza bat sd zoxide git-delta btop tealdeer
+```
+
+Note: Linux package names vary (`fd-find` vs `fd`, `btop` instead of `bottom`, etc.).
+
+#### Tool reference
+
+| Tool | Traditional equivalent | Purpose |
+|------|------------------------|---------|
 | fd | find | Fast file search |
 | ripgrep (rg) | grep | Fast content search |
 | eza | ls | Better directory listing with git |
@@ -66,34 +90,36 @@ brew install \
 | dust | du | Visual disk usage |
 | sd | sed | Simple find/replace |
 | zoxide | cd | Smart directory jumping |
-| git-delta | diff | Better git diffs |
+| git-delta | diff/pager | Better git diffs |
 | broot | tree | Interactive directory navigation |
 | tokei | cloc | Fast code statistics |
 | procs | ps | Better process listing |
 | bottom (btm) | top | Modern system monitor |
 | tealdeer (tldr) | man | Example-based help |
 
-### 4. Configure Shell
+### 4. Configure shell safely
 
-Add to `~/.zprofile` (or `~/.profile` for bash):
+Use `~/.zshrc` for interactive aliases/functions and `zoxide init`.
+
+Default: avoid replacing core commands globally (`cat`, `du`, `ps`, `top`) unless user explicitly opts in.
 
 ```bash
-# Modern CLI aliases
-alias ls='eza'
+# Safe convenience aliases
 alias ll='eza -la --git'
-alias cat='bat --paging=never'
-alias du='dust'
-alias ps='procs'
-alias top='btm'
+alias la='eza -la'
 
-# Zoxide (smart cd)
-eval "$(zoxide init zsh)"
+# Zoxide
+if command -v zoxide >/dev/null 2>&1; then
+  eval "$(zoxide init zsh)"
+fi
 
-# Delta for git diffs
+# Delta pager
 export GIT_PAGER='delta'
 ```
 
-### 5. Configure Git for Delta
+If user requests aggressive remaps, apply them explicitly and warn about script/muscle-memory breakage.
+
+### 5. Configure Git for delta
 
 ```bash
 git config --global core.pager delta
@@ -103,62 +129,50 @@ git config --global delta.light false
 git config --global delta.line-numbers true
 ```
 
-### 6. Install Claude Code Skills
+### 6. Install Claude Code skills
 
-Clone essential skills:
+Create skill directory and install curated skills.
 
 ```bash
-# Create skills directory
 mkdir -p ~/.claude/skills
-
-# Core skills to install (adjust based on user preference)
-SKILLS=(
-  "agent-browser"
-  "pdf"
-  "skill-creator"
-  "find-skills"
-)
-
-# Prompt user for optional skill categories
 ```
 
-### 7. Verify Installation
+Core suggestions:
+- `find-skills`
+- `skill-creator`
+- `pdf`
+
+Optional by category:
+- Browser automation: `agent-browser`
+- GitHub workflow: `gh-pr-*`
+- X/Twitter reading/analysis: `twitter-reader`, `x-impact-checker`
+- Design: `frontend-design`
+- React/Next.js: `vercel-react-best-practices`
+
+Do not install unreviewed high-risk skills by default.
+
+### 7. Verify installation
 
 ```bash
-# Test all tools
 echo "Testing CLI tools..."
-fd --version
-rg --version
-eza --version
-bat --version
-dust --version
-sd --version
-zoxide --version
-delta --version
-broot --version
-tokei --version
-procs --version
-btm --version
-tldr --version
+for cmd in fd rg eza bat dust sd zoxide delta broot tokei procs btm tldr; do
+  command -v "$cmd" >/dev/null 2>&1 && "$cmd" --version || echo "missing: $cmd"
+done
 ```
 
-## Interactive Mode
+## Interactive mode
 
-When invoked, ask the user:
+Ask:
 
-1. **Tool selection**: Install all recommended tools or select individually?
-2. **Shell**: zsh or bash?
-3. **Skills**: Which skill categories to install?
-   - Browser automation (agent-browser)
-   - PDF tools (pdf)
-   - GitHub workflow (gh-pr-*)
-   - Twitter/X tools (twitter-reader, baoyu-post-to-x, x-impact-checker)
-   - Design (frontend-design)
-   - React/Next.js (vercel-react-best-practices)
+1. Install full recommended set or select tools individually?
+2. Shell: zsh or bash?
+3. Use conservative aliases (recommended) or aggressive remaps?
+4. Which skill categories to install?
+5. macOS-only or cross-platform (macOS + Linux) bootstrap template?
 
 ## Customization
 
-Create `~/.claude/bootstrap-config.json` to store preferences:
+Store preferences in `~/.claude/bootstrap-config.json`.
 
 ```json
 {
@@ -167,43 +181,38 @@ Create `~/.claude/bootstrap-config.json` to store preferences:
     "optional": ["git-delta", "broot", "tokei", "procs", "bottom", "tealdeer"]
   },
   "skills": {
-    "always": ["agent-browser", "pdf", "find-skills"],
-    "optional": ["twitter-reader", "baoyu-post-to-x", "frontend-design"]
+    "always": ["find-skills", "skill-creator", "pdf"],
+    "optional": ["twitter-reader", "x-impact-checker", "frontend-design"]
   },
-  "shell": "zsh"
+  "shell": "zsh",
+  "aliases": "conservative"
 }
 ```
 
-## Post-Setup Checklist
+## Post-setup checklist
 
-- [ ] Homebrew installed
+- [ ] Package manager installed (brew/apt/dnf/pacman/zypper)
 - [ ] CLI tools installed
-- [ ] Shell configured with aliases
+- [ ] Shell config updated (`.zshrc` / `.bashrc`)
 - [ ] Git configured for delta
 - [ ] Zoxide initialized
 - [ ] Claude Code skills installed
-- [ ] API keys configured (if needed for skills)
+- [ ] Secrets configured safely
 
-## Manual Steps (cannot be automated)
+## Secrets and API keys
 
-1. **Brave Search API** (if using brave-search skill):
-   - Create account at https://api-dashboard.search.brave.com/register
-   - Add `export BRAVE_API_KEY="..."` to `~/.zshenv`
+Prefer a secrets manager (`op`, keychain, pass, etc.).
+If using env files, prefer a dedicated file sourced by shell startup (for example `~/.config/claude/env`) instead of putting all secrets in `~/.zshenv`.
 
-2. **Jina API** (if using twitter-reader skill):
-   - Sign up at https://jina.ai/
-   - Add `export JINA_API_KEY="..."` to `~/.zshenv`
+Always export variables so child processes inherit them.
 
-**IMPORTANT**: Use `export VAR=value` (not just `VAR=value`) so child processes (Node.js scripts) can access the variables.
+## Sync configuration
 
-## Sync Configuration
-
-If using Syncthing to sync `~/.claude` between machines:
+If syncing `~/.claude` via Syncthing, verify skill symlinks resolve:
 
 ```bash
-# After sync, fix symlinks for skills from ~/.agents/skills/
 cd ~/.claude/skills
-for skill in baoyu-post-to-x find-skills frontend-design pdf skill-creator twitter-reader vercel-react-best-practices x-impact-checker; do
+for skill in find-skills frontend-design pdf skill-creator twitter-reader vercel-react-best-practices x-impact-checker; do
   if [ -L "$skill" ] && [ ! -e "$skill" ]; then
     echo "Broken symlink: $skill - source skill needs to be installed"
   fi
